@@ -1,4 +1,5 @@
 <script setup>
+// Open by default
 const { data: systemPromptOptions, pending: pendingSystemPromptOptions } =
   await useFetch("/api/system-prompts");
 console.dir(systemPromptOptions);
@@ -9,6 +10,7 @@ const models = [
 const uiState = reactive({
   isSubmitting: false,
   isChatting: false,
+  isSettingsOpen: false,
 });
 const state = reactive({
   model: models[0],
@@ -53,60 +55,56 @@ function chooseSystemPrompt(option) {
 
 <template>
   <h1>AI Chat Playground</h1>
-  <div class="grid grid-cols-12 gap-10">
-    <!-- Options -->
-    <div class="col-span-3">
-      <UContainer>
-        <UForm :state="state">
-          <UFormGroup label="Model">
-            <USelect v-model="state.model" :options="models"></USelect>
-          </UFormGroup>
-          <UFormGroup label="System Message">
-            <UTextarea v-model="state.systemMessage"></UTextarea>
-          </UFormGroup>
-          <UButton
-            label="♻️ Reset"
-            v-if="uiState.isChatting"
-            @click="onReset"
-          ></UButton>
-          <UCommandPalette
-            label="Sample System Prompts"
-            @update:model-value="chooseSystemPrompt"
-            :autoselect="false"
-            v-if="!pendingSystemPromptOptions"
-            :groups="systemPromptOptions"
-          />
-        </UForm>
-      </UContainer>
-    </div>
-    <div class="col-span-7">
-      <div class="grid grid-rows-12">
-        <div class="row-span-9">
-          <UContainer>
-            <UCard v-for="message in state.messages">
-              <!-- TODO: icons -->
-              <span v-text="message.role === 'user' ? '👨' : '🤖'"></span>
-              {{ message.content }}
-            </UCard>
-          </UContainer>
-        </div>
-        <div class="row-span-3">
-          <UForm :state="state" @submit="onSubmit">
-            <UFormGroup label="Prompt">
-              <UTextarea
-                v-model="state.userPrompt"
-                :disabled="uiState.isSubmitting"
-              ></UTextarea>
-            </UFormGroup>
-            <UButton
-              label="Prompt"
-              type="submit"
-              :disabled="uiState.isSubmitting"
-            ></UButton>
-          </UForm>
-        </div>
-      </div>
-    </div>
-  </div>
+  <UButton
+    label="Open Settings"
+    @click="uiState.isSettingsOpen = true"
+  ></UButton>
+  <USlideover v-model="uiState.isSettingsOpen">
+    <h2>Settings</h2>
+    <UContainer>
+      <UForm :state="state">
+        <UFormGroup label="Model">
+          <USelect v-model="state.model" :options="models"></USelect>
+        </UFormGroup>
+        <UFormGroup label="System Message">
+          <UTextarea v-model="state.systemMessage"></UTextarea>
+        </UFormGroup>
+        <UButton
+          label="♻️ Reset"
+          v-if="uiState.isChatting"
+          @click="onReset"
+        ></UButton>
+        <UCommandPalette
+          label="Sample System Prompts"
+          @update:model-value="chooseSystemPrompt"
+          :autoselect="false"
+          v-if="!pendingSystemPromptOptions"
+          :groups="systemPromptOptions"
+        />
+      </UForm>
+    </UContainer>
+  </USlideover>
+  <UContainer>
+    <UCard v-for="message in state.messages">
+      <!-- TODO: icons -->
+      <span v-text="message.role === 'user' ? '👨' : '🤖'"></span>
+      {{ message.content }}
+    </UCard>
+  </UContainer>
+  <UContainer>
+    <UForm :state="state" @submit="onSubmit">
+      <UFormGroup label="Prompt">
+        <UTextarea
+          v-model="state.userPrompt"
+          :disabled="uiState.isSubmitting"
+        ></UTextarea>
+      </UFormGroup>
+      <UButton
+        label="Prompt"
+        type="submit"
+        :disabled="uiState.isSubmitting"
+      ></UButton>
+    </UForm>
+  </UContainer>
   <UNotifications />
 </template>
