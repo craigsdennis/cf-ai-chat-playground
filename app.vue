@@ -51,13 +51,17 @@ function chooseSystemPrompt(option) {
   console.dir(option);
   state.systemMessage = option.prompt;
 }
+
+function openSettings() {
+  uiState.isSettingsOpen = true;
+}
 </script>
 
 <template>
   <h1>AI Chat Playground</h1>
   <UButton
     label="Open Settings"
-    @click="uiState.isSettingsOpen = true"
+    @click="openSettings"
   ></UButton>
   <USlideover v-model="uiState.isSettingsOpen">
     <h2>Settings</h2>
