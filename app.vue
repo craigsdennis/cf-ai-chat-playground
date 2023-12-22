@@ -1,8 +1,9 @@
 <script setup>
-// Open by default
+const toast = useToast();
+
 const { data: systemPromptOptions, pending: pendingSystemPromptOptions } =
   await useFetch("/api/system-prompts");
-console.dir(systemPromptOptions);
+
 const models = [
   "@cf/meta/llama-2-7b-chat-int8",
   "@cf/meta/llama-2-7b-chat-fp16",
@@ -10,7 +11,7 @@ const models = [
 const uiState = reactive({
   isSubmitting: false,
   isChatting: false,
-  isSettingsOpen: true,
+  isSettingsOpen: false,
 });
 const state = reactive({
   model: models[0],
@@ -36,7 +37,6 @@ async function onSubmit(event) {
 }
 function onReset() {
   console.log("Resetting forms");
-  const toast = useToast();
   toast.add({ title: "Reset", description: "The chat has been reset" });
   uiState.isChatting = false;
   uiState.isSubmitting = false;
@@ -53,62 +53,66 @@ function chooseSystemPrompt(option) {
 }
 
 function openSettings() {
+  console.log("Attempting to open settings");
   uiState.isSettingsOpen = true;
 }
+
+//openSettings();
 </script>
 
 <template>
   <h1>AI Chat Playground</h1>
-  <UButton
-    label="Open Settings"
-    @click="openSettings"
-  ></UButton>
-  <USlideover v-model="uiState.isSettingsOpen">
-    <h2>Settings</h2>
+  <div>
+    <UButton label="Open Settings" @click="openSettings"></UButton>
+    <div>
+      <USlideover v-model="uiState.isSettingsOpen" :transition="false">
+        <UCard>
+          <template #header> Settings </template>
+          <UForm :state="state">
+            <UFormGroup label="Model">
+              <USelect v-model="state.model" :options="models"></USelect>
+            </UFormGroup>
+            <UFormGroup label="System Message">
+              <UTextarea v-model="state.systemMessage" :rows="10"></UTextarea>
+            </UFormGroup>
+            <UButton
+              label="♻️ Reset"
+              v-if="uiState.isChatting"
+              @click="onReset"
+            ></UButton>
+          </UForm>
+          <UCommandPalette
+            label="Sample System Prompts"
+            @update:model-value="chooseSystemPrompt"
+            :autoselect="false"
+            v-if="!pendingSystemPromptOptions"
+            :groups="systemPromptOptions"
+          />
+        </UCard>
+      </USlideover>
+    </div>
     <UContainer>
-      <UForm :state="state">
-        <UFormGroup label="Model">
-          <USelect v-model="state.model" :options="models"></USelect>
-        </UFormGroup>
-        <UFormGroup label="System Message">
-          <UTextarea v-model="state.systemMessage"></UTextarea>
+      <UCard v-for="message in state.messages">
+        <!-- TODO: icons -->
+        <span v-text="message.role === 'user' ? '👨' : '🤖'"></span>
+        {{ message.content }}
+      </UCard>
+    </UContainer>
+    <UContainer>
+      <UForm :state="state" @submit="onSubmit">
+        <UFormGroup label="Prompt">
+          <UTextarea
+            v-model="state.userPrompt"
+            :disabled="uiState.isSubmitting"
+          ></UTextarea>
         </UFormGroup>
         <UButton
-          label="♻️ Reset"
-          v-if="uiState.isChatting"
-          @click="onReset"
+          label="Prompt"
+          type="submit"
+          :disabled="uiState.isSubmitting"
         ></UButton>
-        <UCommandPalette
-          label="Sample System Prompts"
-          @update:model-value="chooseSystemPrompt"
-          :autoselect="false"
-          v-if="!pendingSystemPromptOptions"
-          :groups="systemPromptOptions"
-        />
       </UForm>
     </UContainer>
-  </USlideover>
-  <UContainer>
-    <UCard v-for="message in state.messages">
-      <!-- TODO: icons -->
-      <span v-text="message.role === 'user' ? '👨' : '🤖'"></span>
-      {{ message.content }}
-    </UCard>
-  </UContainer>
-  <UContainer>
-    <UForm :state="state" @submit="onSubmit">
-      <UFormGroup label="Prompt">
-        <UTextarea
-          v-model="state.userPrompt"
-          :disabled="uiState.isSubmitting"
-        ></UTextarea>
-      </UFormGroup>
-      <UButton
-        label="Prompt"
-        type="submit"
-        :disabled="uiState.isSubmitting"
-      ></UButton>
-    </UForm>
-  </UContainer>
-  <UNotifications />
+    <UNotifications />
+  </div>
 </template>
