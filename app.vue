@@ -10,7 +10,7 @@ const models = [
 const uiState = reactive({
   isSubmitting: false,
   isChatting: false,
-  isSettingsOpen: false,
+  isSettingsOpen: true,
 });
 const state = reactive({
   model: models[0],
