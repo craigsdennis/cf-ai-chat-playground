@@ -20,16 +20,35 @@ const state = reactive({
   messages: [],
 });
 
-// TODO: Break this out
 async function onSubmit(event) {
   console.log(`Client side onSubmit`);
   uiState.isSubmitting = true;
   uiState.isChatting = true;
-  const response = await $fetch("/api/prompt", {
-    method: "POST",
-    body: state,
-  });
-  state.messages.push({ role: "user", content: state.userPrompt });
+  // const response = await $fetch("/api/prompt", {
+  //   method: "POST",
+  //   body: state,
+  // });
+  await fetchEventSource("/api/prompt", {
+      method: "POST",
+      body: JSON.stringify(state),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      onopen: async (response) => {
+        state.messages.push({ role: "user", content: state.userPrompt });
+        state.messages.push({ role: "assistant", content: "" });
+        uiState.isStreamingResponse = true;
+      },
+      onmessage: async (msg) => {
+        if (msg.event === "end") {
+          uiState.isStreamingResponse = false;
+        } else if (msg.event === "data" && msg.data) {
+          const data = JSON.parse(msg.data);
+          state.messages[state.messages.length -1].content += data.response;
+        }
+      },
+    }
+  )
   state.userPrompt = "";
   console.log(`Got back ${JSON.stringify(response)}`);
   state.messages.push(response);

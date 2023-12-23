@@ -20,6 +20,7 @@
     "wrangler": "^3.22.1"
   },
   "dependencies": {
-    "@cloudflare/ai": "^1.0.47"
+    "@cloudflare/ai": "^1.0.47",
+    "@microsoft/fetch-event-source": "^2.0.1"
   }
 }

@@ -10,7 +10,10 @@ export default defineEventHandler(async (event) => {
     { role: "user", content: body.userPrompt },
   ];
   console.log(`Sending ${JSON.stringify(messages)} to ${body.model}`);
-  const response = await ai.run(body.model, { messages });
-  console.log(`Received ${JSON.stringify(response)}`);
-  return {role: "assistant", content: response.response};
+  const stream = await ai.run(body.model, { messages, stream: true });
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+    },
+  });
 });
