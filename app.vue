@@ -1,4 +1,6 @@
 <script setup>
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+
 const toast = useToast();
 
 const { data: systemPromptOptions, pending: pendingSystemPromptOptions } =
@@ -12,6 +14,7 @@ const uiState = reactive({
   isSubmitting: false,
   isChatting: false,
   isSettingsOpen: false,
+  isStreamingResponse: false,
 });
 const state = reactive({
   model: models[0],
@@ -34,15 +37,18 @@ async function onSubmit(event) {
       headers: {
         "Content-Type": "application/json",
       },
+      openWhenHidden: true,
       onopen: async (response) => {
+        console.log(`onOpen`);
+        console.dir(response);
         state.messages.push({ role: "user", content: state.userPrompt });
         state.messages.push({ role: "assistant", content: "" });
         uiState.isStreamingResponse = true;
       },
       onmessage: async (msg) => {
-        if (msg.event === "end") {
+        if (msg.data === "[DONE]") {
           uiState.isStreamingResponse = false;
-        } else if (msg.event === "data" && msg.data) {
+        } else {
           const data = JSON.parse(msg.data);
           state.messages[state.messages.length -1].content += data.response;
         }
@@ -50,8 +56,6 @@ async function onSubmit(event) {
     }
   )
   state.userPrompt = "";
-  console.log(`Got back ${JSON.stringify(response)}`);
-  state.messages.push(response);
   uiState.isSubmitting = false;
 }
 function onReset() {
