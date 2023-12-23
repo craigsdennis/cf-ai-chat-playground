@@ -48,6 +48,7 @@ async function onSubmit(event) {
       onmessage: async (msg) => {
         if (msg.data === "[DONE]") {
           uiState.isStreamingResponse = false;
+          uiState.isSubmitting = false;
         } else {
           const data = JSON.parse(msg.data);
           state.messages[state.messages.length -1].content += data.response;
@@ -56,7 +57,6 @@ async function onSubmit(event) {
     }
   )
   state.userPrompt = "";
-  uiState.isSubmitting = false;
 }
 function onReset() {
   console.log("Resetting forms");
