@@ -90,6 +90,7 @@ onMounted(() => {
 <template>
   <div>
     <h1>AI Chat Playground</h1>
+    <p>An exploration of <a href="https://developers.cloudflare.com/workers-ai/">Cloudflare Workers AI</a> chat models.</p>
     <UButton
       icon="i-ri-chat-settings-line"
       @click="openSettings"
