@@ -1,5 +1,7 @@
 <script setup>
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import hljs from 'highlight.js';
+import 'highlight.js/styles/nord.css';
 
 const toast = useToast();
 
@@ -23,6 +25,10 @@ const state = reactive({
   messages: [],
 });
 
+function onChatResponseCompleted() {
+  hljs.highlightAll();
+}
+
 async function onSubmit(event) {
   console.log(`Client side onSubmit`);
   uiState.isSubmitting = true;
@@ -43,6 +49,7 @@ async function onSubmit(event) {
       },
       onmessage: async (msg) => {
         if (msg.data === "[DONE]") {
+          onChatResponseCompleted();
           uiState.isStreamingResponse = false;
           uiState.isSubmitting = false;
         } else {
@@ -75,14 +82,16 @@ function openSettings() {
   console.log("Attempting to open settings");
   uiState.isSettingsOpen = true;
 }
-
-//openSettings();
+onMounted(() => {
+  openSettings();
+  hljs.highlightAll();
+});
 </script>
 
 <template>
   <h1>AI Chat Playground</h1>
   <div>
-    <UButton label="Open Settings" @click="openSettings"></UButton>
+    <UButton icon="i-ri-chat-settings-line" @click="openSettings"></UButton>
     <div>
       <USlideover v-model="uiState.isSettingsOpen" :transition="false">
         <UCard>
@@ -113,10 +122,10 @@ function openSettings() {
     <UContainer>
       <UCard v-for="(message, index) in state.messages">
         <!-- TODO: icons -->
-        <UAvatar v-if="message.role === 'user'" icon="i-ri-user-fill"/>
-        <UAvatar v-else-if="uiState.isStreamingResponse && index === state.messages.length -1" icon="i-ri-robot-3-line" />
-        <UAvatar v-else icon="i-ri-robot-3-fill" />
-        {{ message.content }}
+        <UAvatar v-if="message.role === 'user'" icon="i-ri-user-fill" size="lg"/>
+        <UAvatar v-else-if="uiState.isStreamingResponse && index === state.messages.length -1" icon="i-ri-robot-3-line" size="lg"/>
+        <UAvatar v-else icon="i-ri-robot-3-fill" size="lg"/>
+        <div v-html="$mdRenderer.render(message.content)" />
       </UCard>
     </UContainer>
     <UContainer>

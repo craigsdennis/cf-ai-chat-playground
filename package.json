@@ -15,6 +15,9 @@
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@nuxt/ui": "^2.11.1",
+    "@types/markdown-it": "^13.0.7",
+    "markdown-it": "^14.0.0",
+    "markdown-it-highlightjs": "^4.0.1",
     "nuxt": "^3.8.2",
     "vue": "^3.3.12",
     "vue-router": "^4.2.5",
