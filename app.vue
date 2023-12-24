@@ -27,10 +27,6 @@ async function onSubmit(event) {
   console.log(`Client side onSubmit`);
   uiState.isSubmitting = true;
   uiState.isChatting = true;
-  // const response = await $fetch("/api/prompt", {
-  //   method: "POST",
-  //   body: state,
-  // });
   await fetchEventSource("/api/prompt", {
       method: "POST",
       body: JSON.stringify(state),
@@ -115,9 +111,11 @@ function openSettings() {
       </USlideover>
     </div>
     <UContainer>
-      <UCard v-for="message in state.messages">
+      <UCard v-for="(message, index) in state.messages">
         <!-- TODO: icons -->
-        <span v-text="message.role === 'user' ? '👨' : '🤖'"></span>
+        <UAvatar v-if="message.role === 'user'" icon="i-ri-user-fill"/>
+        <UAvatar v-else-if="uiState.isStreamingResponse && index === state.messages.length -1" icon="i-ri-robot-3-line" />
+        <UAvatar v-else icon="i-ri-robot-3-fill" />
         {{ message.content }}
       </UCard>
     </UContainer>

@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "pages:dev": "wrangler pages dev --compatibility-date=2023-12-18 --proxy 3000 -- npm run dev",
-    "pages:deploy": "npm run build && wrangler pages deploy ./dist"
+    "pages:deploy": "npm run build && wrangler pages deploy ./dist",
+    "pages:deploy-dirty": "npm run build && wrangler pages deploy ./dist --commit-dirty=true"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "@cloudflare/ai": "^1.0.47",
+    "@iconify-json/ri": "^1.1.18",
     "@microsoft/fetch-event-source": "^2.0.1"
   }
 }
