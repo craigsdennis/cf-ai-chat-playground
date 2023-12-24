@@ -1,7 +1,7 @@
 <script setup>
 import { fetchEventSource } from "@microsoft/fetch-event-source";
-import hljs from 'highlight.js';
-import 'highlight.js/styles/nord.css';
+import hljs from "highlight.js";
+import "highlight.js/styles/nord.css";
 
 const toast = useToast();
 
@@ -34,31 +34,31 @@ async function onSubmit(event) {
   uiState.isSubmitting = true;
   uiState.isChatting = true;
   await fetchEventSource("/api/prompt", {
-      method: "POST",
-      body: JSON.stringify(state),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      openWhenHidden: true,
-      onopen: async (response) => {
-        console.log(`onOpen`);
-        console.dir(response);
-        state.messages.push({ role: "user", content: state.userPrompt });
-        state.messages.push({ role: "assistant", content: "" });
-        uiState.isStreamingResponse = true;
-      },
-      onmessage: async (msg) => {
-        if (msg.data === "[DONE]") {
-          onChatResponseCompleted();
-          uiState.isStreamingResponse = false;
-          uiState.isSubmitting = false;
-        } else {
-          const data = JSON.parse(msg.data);
-          state.messages[state.messages.length -1].content += data.response;
-        }
-      },
-    }
-  )
+    method: "POST",
+    body: JSON.stringify(state),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    openWhenHidden: true,
+    onopen: async (response) => {
+      console.log(`onOpen`);
+      console.dir(response);
+      state.messages.push({ role: "user", content: state.userPrompt });
+      state.messages.push({ role: "assistant", content: "" });
+      uiState.isStreamingResponse = true;
+    },
+    onmessage: async (msg) => {
+      if (msg.data === "[DONE]") {
+        onChatResponseCompleted();
+        uiState.isStreamingResponse = false;
+        uiState.isSubmitting = false;
+      } else {
+        // Adding a token at a time
+        const data = JSON.parse(msg.data);
+        state.messages[state.messages.length - 1].content += data.response;
+      }
+    },
+  });
   state.userPrompt = "";
 }
 function onReset() {
@@ -84,14 +84,17 @@ function openSettings() {
 }
 onMounted(() => {
   openSettings();
-  hljs.highlightAll();
 });
 </script>
 
 <template>
-  <h1>AI Chat Playground</h1>
   <div>
-    <UButton icon="i-ri-chat-settings-line" @click="openSettings"></UButton>
+    <h1>AI Chat Playground</h1>
+    <UButton
+      icon="i-ri-chat-settings-line"
+      @click="openSettings"
+      label="Open Settings"
+    />
     <div>
       <USlideover v-model="uiState.isSettingsOpen" :transition="false">
         <UCard>
@@ -103,12 +106,18 @@ onMounted(() => {
             <UFormGroup label="System Message">
               <UTextarea v-model="state.systemMessage" :rows="10"></UTextarea>
             </UFormGroup>
+          </UForm>
+          <template #footer>
             <UButton
-              label="♻️ Reset"
+              icon="i-ri-delete-bin-6-line"
+              label="Reset"
               v-if="uiState.isChatting"
               @click="onReset"
             ></UButton>
-          </UForm>
+          </template>
+        </UCard>
+        <UCard>
+          <template #header> Choose from existing System Prompts </template>
           <UCommandPalette
             label="Sample System Prompts"
             @update:model-value="chooseSystemPrompt"
@@ -121,27 +130,40 @@ onMounted(() => {
     </div>
     <UContainer>
       <UCard v-for="(message, index) in state.messages">
-        <!-- TODO: icons -->
-        <UAvatar v-if="message.role === 'user'" icon="i-ri-user-fill" size="lg"/>
-        <UAvatar v-else-if="uiState.isStreamingResponse && index === state.messages.length -1" icon="i-ri-robot-3-line" size="lg"/>
-        <UAvatar v-else icon="i-ri-robot-3-fill" size="lg"/>
+        <UAvatar
+          v-if="message.role === 'user'"
+          icon="i-ri-chat-1-fill"
+          size="lg"
+        />
+        <UAvatar
+          v-else-if="
+            uiState.isStreamingResponse && index === state.messages.length - 1
+          "
+          icon="i-ri-robot-3-line"
+          size="lg"
+        />
+        <UAvatar v-else icon="i-ri-robot-3-fill" size="lg" />
         <div v-html="$mdRenderer.render(message.content)" />
       </UCard>
     </UContainer>
     <UContainer>
-      <UForm :state="state" @submit="onSubmit">
-        <UFormGroup label="Prompt">
-          <UTextarea
-            v-model="state.userPrompt"
+      <UCard>
+        <template #header> Prompt </template>
+        <UForm :state="state" @submit="onSubmit">
+          <UFormGroup>
+            <UTextarea
+              v-model="state.userPrompt"
+              :disabled="uiState.isSubmitting"
+            ></UTextarea>
+          </UFormGroup>
+          <UButton
+            icon="i-ri-chat-1-line"
+            label="Prompt"
+            type="submit"
             :disabled="uiState.isSubmitting"
-          ></UTextarea>
-        </UFormGroup>
-        <UButton
-          label="Prompt"
-          type="submit"
-          :disabled="uiState.isSubmitting"
-        ></UButton>
-      </UForm>
+          ></UButton>
+        </UForm>
+      </UCard>
     </UContainer>
     <UNotifications />
   </div>
