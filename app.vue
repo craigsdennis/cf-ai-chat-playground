@@ -90,7 +90,13 @@ onMounted(() => {
 <template>
   <div>
     <h1>AI Chat Playground</h1>
-    <p>An exploration of <a href="https://developers.cloudflare.com/workers-ai/">Cloudflare Workers AI</a> chat models.</p>
+    <p>
+      An exploration of
+      <a href="https://developers.cloudflare.com/workers-ai/"
+        >Cloudflare Workers AI</a
+      >
+      chat models.
+    </p>
     <UButton
       icon="i-ri-chat-settings-line"
       @click="openSettings"
@@ -149,20 +155,22 @@ onMounted(() => {
     </UContainer>
     <UContainer>
       <UCard>
-        <template #header> Prompt </template>
         <UForm :state="state" @submit="onSubmit">
-          <UFormGroup>
-            <UTextarea
-              v-model="state.userPrompt"
-              :disabled="uiState.isSubmitting"
-            ></UTextarea>
+          <UFormGroup help="Chat with AI">
+            <UButtonGroup>
+              <UTextarea
+                autoresize
+                v-model="state.userPrompt"
+                :disabled="uiState.isSubmitting"
+              ></UTextarea>
+              <UButton
+                icon="i-ri-chat-1-line"
+                type="submit"
+                default
+                :disabled="uiState.isSubmitting"
+              ></UButton>
+            </UButtonGroup>
           </UFormGroup>
-          <UButton
-            icon="i-ri-chat-1-line"
-            label="Prompt"
-            type="submit"
-            :disabled="uiState.isSubmitting"
-          ></UButton>
         </UForm>
       </UCard>
     </UContainer>
