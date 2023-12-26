@@ -156,15 +156,17 @@ onMounted(() => {
     <UContainer>
       <UCard>
         <UForm :state="state" @submit="onSubmit">
-          <UFormGroup>
+          <UFormGroup size="xl">
             <template #help>
               <p>Chat with AI</p>
               <p><UKbd>Shift</UKbd><UKbd>Enter</UKbd> submits</p>
             </template>
             <UButtonGroup>
               <UTextarea
+                :padded="false"
                 name="userPrompt"
                 autoresize
+                rows="2"
                 v-model="state.userPrompt"
                 @keyup.shift.enter="onSubmit"
                 :disabled="uiState.isSubmitting"
