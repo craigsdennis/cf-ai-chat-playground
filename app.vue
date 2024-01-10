@@ -27,6 +27,8 @@ const state = reactive({
 
 function onChatResponseCompleted() {
   hljs.highlightAll();
+  uiState.isStreamingResponse = false;
+  uiState.isSubmitting = false;
 }
 
 async function onSubmit(event) {
@@ -50,11 +52,10 @@ async function onSubmit(event) {
     onmessage: async (msg) => {
       if (msg.data === "[DONE]") {
         onChatResponseCompleted();
-        uiState.isStreamingResponse = false;
-        uiState.isSubmitting = false;
       } else {
         // Adding a token at a time
         const data = JSON.parse(msg.data);
+        // Why duped sometimes?
         state.messages[state.messages.length - 1].content += data.response;
       }
     },
@@ -159,7 +160,7 @@ onMounted(() => {
           <UFormGroup size="xl">
             <template #help>
               <p>Chat with AI</p>
-              <p><UKbd>Shift</UKbd><UKbd>Enter</UKbd> submits</p>
+              <p><UKbd>Shift</UKbd>+<UKbd>Enter</UKbd> submits</p>
             </template>
             <UButtonGroup>
               <UTextarea
