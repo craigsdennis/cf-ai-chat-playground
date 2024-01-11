@@ -67,10 +67,12 @@ function onReset() {
   toast.add({ title: "Reset", description: "The chat has been reset" });
   uiState.isChatting = false;
   uiState.isSubmitting = false;
-  state.model = "";
   state.messages = [];
-  state.systemMessage = "";
+  // Let's see how leaving these in place feels
+  // state.model = "";
+  // state.systemMessage = "";
   state.userPrompt = "";
+  openSettings();
 }
 
 function chooseSystemPrompt(option) {
@@ -100,13 +102,13 @@ onMounted(() => {
     </p>
     <UButton
       icon="i-ri-chat-settings-line"
-      @click="openSettings"
-      label="Open Settings"
+      @click="onReset"
+      label="Reset"
     />
     <div>
       <UModal v-model="uiState.isSettingsOpen">
         <UCard>
-          <template #header> Settings Modal</template>
+          <template #header> Settings </template>
           <UForm :state="state">
             <UFormGroup label="Model">
               <USelect v-model="state.model" :options="models"></USelect>
@@ -115,14 +117,6 @@ onMounted(() => {
               <UTextarea v-model="state.systemMessage" :rows="10"></UTextarea>
             </UFormGroup>
           </UForm>
-          <template #footer>
-            <UButton
-              icon="i-ri-delete-bin-6-line"
-              label="Reset"
-              v-if="uiState.isChatting"
-              @click="onReset"
-            ></UButton>
-          </template>
         </UCard>
         <UCard>
           <template #header> Choose from existing System Prompts </template>
