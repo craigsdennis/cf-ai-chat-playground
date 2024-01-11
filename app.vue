@@ -104,9 +104,9 @@ onMounted(() => {
       label="Open Settings"
     />
     <div>
-      <USlideover v-model="uiState.isSettingsOpen" :transition="false">
+      <UModal v-model="uiState.isSettingsOpen">
         <UCard>
-          <template #header> Settings </template>
+          <template #header> Settings Modal</template>
           <UForm :state="state">
             <UFormGroup label="Model">
               <USelect v-model="state.model" :options="models"></USelect>
@@ -134,7 +134,7 @@ onMounted(() => {
             :groups="systemPromptOptions"
           />
         </UCard>
-      </USlideover>
+      </UModal>
     </div>
     <UContainer>
       <UCard v-for="(message, index) in state.messages">
